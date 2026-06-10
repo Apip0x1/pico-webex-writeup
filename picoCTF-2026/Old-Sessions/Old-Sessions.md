@@ -31,8 +31,6 @@ Hint yang diberikan juga mengarah ke inspeksi cookie pada browser:
 2. Where are cookies stored?
 ```
 
-> 📸 **Placeholder gambar:** Screenshot halaman challenge/landing page yang menampilkan form register atau login.
-> Simpan sebagai: `images/01-homepage-login.png`
 >
 > ![Homepage dan form login/register](images/01-homepage-login.png)
 
@@ -40,7 +38,6 @@ Hint yang diberikan juga mengarah ke inspeksi cookie pada browser:
 
 Pertama, saya membuka website challenge. Pada halaman awal tersedia fitur registrasi dan login. Saya membuat akun baru, kemudian login menggunakan akun tersebut.
 
-> 📸 **Placeholder gambar:** Screenshot dashboard/feed setelah login sebagai user biasa. Karena chat langsung tampil di dashboard, pastikan screenshot ini juga memperlihatkan area chat/posting aplikasi.
 > Simpan sebagai: `images/02-dashboard-chat.png`
 >
 > ![Dashboard setelah login yang langsung menampilkan chat](images/02-dashboard-chat.png)
@@ -53,7 +50,6 @@ mary_jones_8992
 Hey I found a strange page at /sessions
 ```
 
-> 📸 **Placeholder gambar:** Screenshot detail/zoom dari bagian chat di dashboard yang berisi petunjuk `Hey I found a strange page at /sessions`.
 > Simpan sebagai: `images/03-chat-hint-sessions.png`
 >
 > ![Bagian chat dashboard yang berisi hint endpoint sessions](images/03-chat-hint-sessions.png)
@@ -74,7 +70,6 @@ Output yang ditemukan:
 2) session:EqUgE5_899JasRtzzEfo6RhpcE-DJMU4onIH0cMq5gg, {'_permanent': True, 'key': 'apip'}
 ```
 
-> 📸 **Placeholder gambar:** Screenshot halaman `/sessions` yang menampilkan daftar session aktif, termasuk session admin dan user biasa.
 > Simpan sebagai: `images/04-sessions-endpoint.png`
 >
 > ![Endpoint sessions menampilkan session aktif](images/04-sessions-endpoint.png)
@@ -179,7 +174,6 @@ Pada bagian cookies, saya mencari cookie bernama:
 session
 ```
 
-> 📸 **Placeholder gambar:** Screenshot DevTools tab Application/Storage yang menampilkan cookie `session` sebelum diganti.
 > Simpan sebagai: `images/05-cookie-before.png`
 >
 > ![Cookie session sebelum diganti](images/05-cookie-before.png)
@@ -198,7 +192,6 @@ Sesudah diganti:
 session=Z0rpf3gFJn1SGVBwSdQSsbnDhuJOtsVexAadrS0qjMU
 ```
 
-> 📸 **Placeholder gambar:** Screenshot DevTools setelah nilai cookie `session` diganti menjadi session milik admin.
 > Simpan sebagai: `images/06-cookie-after-admin-session.png`
 >
 > ![Cookie session setelah diganti menjadi session admin](images/06-cookie-after-admin-session.png)
@@ -209,7 +202,6 @@ Setelah cookie diganti, saya kembali ke halaman utama aplikasi dan melakukan ref
 
 Setelah berhasil mengambil alih session admin, flag ditampilkan pada halaman web.
 
-> 📸 **Placeholder gambar:** Screenshot halaman utama setelah refresh yang menunjukkan akses sebagai admin dan flag muncul.
 > Simpan sebagai: `images/07-flag-admin-page.png`
 >
 > ![Flag muncul setelah session hijacking](images/07-flag-admin-page.png)
