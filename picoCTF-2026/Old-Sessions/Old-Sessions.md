@@ -40,12 +40,12 @@ Hint yang diberikan juga mengarah ke inspeksi cookie pada browser:
 
 Pertama, saya membuka website challenge. Pada halaman awal tersedia fitur registrasi dan login. Saya membuat akun baru, kemudian login menggunakan akun tersebut.
 
-> 📸 **Placeholder gambar:** Screenshot halaman setelah login sebagai user biasa, misalnya dashboard/feed aplikasi.
-> Simpan sebagai: `images/02-user-dashboard.png`
+> 📸 **Placeholder gambar:** Screenshot dashboard/feed setelah login sebagai user biasa. Karena chat langsung tampil di dashboard, pastikan screenshot ini juga memperlihatkan area chat/posting aplikasi.
+> Simpan sebagai: `images/02-dashboard-chat.png`
 >
-> ![Dashboard setelah login sebagai user biasa](images/02-user-dashboard.png)
+> ![Dashboard setelah login yang langsung menampilkan chat](images/02-dashboard-chat.png)
 
-Setelah berhasil login, saya melihat beberapa chat/posting di dalam aplikasi. Di salah satu chat terdapat pesan dari user berikut:
+Setelah berhasil login, saya langsung melihat isi chat/posting di dashboard aplikasi. Di salah satu chat terdapat pesan dari user berikut:
 
 ```text
 mary_jones_8992
@@ -53,10 +53,10 @@ mary_jones_8992
 Hey I found a strange page at /sessions
 ```
 
-> 📸 **Placeholder gambar:** Screenshot chat/post yang berisi petunjuk `Hey I found a strange page at /sessions`.
+> 📸 **Placeholder gambar:** Screenshot detail/zoom dari bagian chat di dashboard yang berisi petunjuk `Hey I found a strange page at /sessions`.
 > Simpan sebagai: `images/03-chat-hint-sessions.png`
 >
-> ![Chat berisi hint endpoint sessions](images/03-chat-hint-sessions.png)
+> ![Bagian chat dashboard yang berisi hint endpoint sessions](images/03-chat-hint-sessions.png)
 
 Pesan tersebut menjadi petunjuk penting karena menyebutkan endpoint tersembunyi:
 
