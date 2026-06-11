@@ -263,3 +263,5 @@ picoCTF{n0_r4t3_n0_4uth_7bd3c284}
 ## Lesson Learned
 
 Jangan menyimpan data sensitif seperti OTP di client-side session cookie, karena cookie Flask hanya ditandatangani, bukan dienkripsi. Selain itu, password harus di-hash menggunakan algoritma khusus password seperti bcrypt, scrypt, atau Argon2 dengan salt unik agar tidak mudah dicrack ketika database bocor.
+
+Writer : Muhammad Afif Nuromli
