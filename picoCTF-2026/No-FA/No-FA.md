@@ -1,72 +1,89 @@
-# No FA — picoCTF 2026
+# No-FA - Writeup
 
-| Informasi | Detail |
+## Challenge Information
+
+| Field | Value |
 |---|---|
-| Event | picoCTF 2026 |
-| Challenge | No FA |
-| Kategori | Web Exploitation |
+| Category | Web Exploitation |
 | Difficulty | Medium |
-| Poin | 200 |
 | Author | Darkraicg492 |
+| Platform | picoCTF 2026 |
 
-## Deskripsi Challenge
+## Description
 
 > Seems like some data has been leaked! Can you get the flag?
 
-Pada challenge ini, kita diberikan sebuah aplikasi web beserta data yang bocor. Tujuan akhirnya adalah mendapatkan flag dari halaman utama aplikasi. Dari source code, flag hanya akan ditampilkan ketika user yang login adalah `admin`.
+Challenge ini memberikan sebuah aplikasi web Flask dan database SQLite yang sudah bocor. Target utama dari challenge ini adalah mendapatkan flag yang hanya ditampilkan ketika user yang sedang login adalah `admin`.
 
-## Reconnaissance / Analisis Awal
+---
 
-Attachment challenge berisi dua file penting:
+## Initial Analysis
+
+Saat pertama kali membuka challenge, terlihat bahwa aplikasi menyediakan fitur autentikasi sederhana berupa halaman login. Setelah melihat attachment yang diberikan, terdapat dua file penting:
 
 - Source code aplikasi Flask: [`app.py`](attachment/app.py)
 - Database SQLite: [`users.db`](attachment/users.db)
 
-Langkah pertama adalah memahami struktur database yang diberikan. File database terdeteksi sebagai SQLite.
+Dari sisi fitur, aplikasi memiliki beberapa bagian utama:
+
+1. Login menggunakan username dan password.
+2. Mekanisme Two-Factor Authentication atau 2FA untuk user tertentu.
+3. Halaman utama yang menampilkan flag jika user yang login adalah `admin`.
+4. Logout untuk menghapus status login.
+
+Hint challenge mengarah ke wordlist populer:
+
+```text
+rockyou rockyou rockyou
+```
+
+Dugaan awalnya, karena challenge menyebutkan data leak dan terdapat database yang bocor, kemungkinan besar credential user dapat diperoleh dari database tersebut. Setelah credential ditemukan, proses berikutnya adalah mencari cara melewati 2FA milik akun admin.
+
+Screenshot:
+
+![Halaman login](images/login.png)
+
+---
+
+## Enumeration
+
+Tahap enumeration dimulai dari attachment challenge. File database dicek terlebih dahulu untuk mengetahui tipe dan isinya.
 
 ```bash
 file users.db
 ```
 
-Output:
+Output menunjukkan bahwa file tersebut adalah database SQLite:
 
 ```text
 users.db: SQLite 3.x database, last written using SQLite version 3049001, file counter 2, database pages 4, cookie 0x1, schema 4, UTF-8, version-valid-for 2
 ```
 
-Kemudian database dibuka menggunakan `sqlite3`.
+Database kemudian dibuka menggunakan `sqlite3`:
 
 ```bash
 sqlite3 users.db
 ```
 
-Output awal:
-
-```text
-SQLite version 3.45.1 2024-01-30 16:01:20
-Enter ".help" for usage hints.
-sqlite>
-```
-
-Melihat daftar tabel:
+Daftar tabel dicek dengan perintah berikut:
 
 ```sql
 .tables
 ```
 
-Output:
+Hasilnya hanya terdapat satu tabel:
 
 ```text
 users
 ```
 
-Melihat schema tabel `users`:
+Schema tabel `users` kemudian dianalisis:
 
 ```sql
 .schema users
 ```
 
-Output:
+Schema tabel:
 
 ```sql
 CREATE TABLE users (
@@ -78,17 +95,17 @@ CREATE TABLE users (
 );
 ```
 
-Dari isi tabel, ditemukan akun `admin` dengan hash password dan status 2FA aktif.
+Dari isi tabel, ditemukan akun `admin` dengan hash password dan status 2FA aktif:
 
 ```text
 5|admin|iamadmin@nfs.com|c20fa16907343eef642d10f0bdb81bf629e6aaf6c906f26eabda079ca9e5ab67|1
 ```
 
-Screenshot proses pengecekan database:
+Screenshot:
 
 ![Command untuk membaca users.db](images/command%20for%20usersdb.png)
 
-Selanjutnya, source code aplikasi dianalisis untuk memahami alur autentikasi. Pada route `/`, flag hanya diberikan jika username pada session adalah `admin`.
+Setelah itu, source code aplikasi dianalisis. Pada route `/`, flag hanya diberikan jika `session['username']` bernilai `admin`.
 
 ```python
 @app.route("/")
@@ -108,56 +125,61 @@ Artinya, untuk mendapatkan flag kita harus:
 
 1. Login sebagai `admin`.
 2. Melewati proses 2FA.
-3. Mengakses halaman utama sebagai user `admin`.
+3. Mengakses halaman utama dalam kondisi session valid sebagai admin.
 
-## Vulnerability Identified
+---
 
-Terdapat dua kelemahan utama pada aplikasi ini.
+## Vulnerability Analysis
 
-### 1. Password Hash Menggunakan SHA-256 Tanpa Salt
+### Finding
 
-Pada proses login, password dari input user langsung di-hash menggunakan SHA-256 lalu dibandingkan dengan hash yang tersimpan di database.
+Terdapat dua temuan utama pada challenge ini:
+
+1. **Information Disclosure melalui database leak**
+2. **2FA bypass karena OTP disimpan di client-side session cookie**
+
+#### 1. Information Disclosure
+
+Database yang diberikan berisi data user, termasuk hash password akun admin. Password admin disimpan sebagai hash SHA-256 tanpa salt.
+
+Pada source code, proses validasi password dilakukan seperti berikut:
 
 ```python
 if user and hashlib.sha256(password.encode()).hexdigest() == user['password']:
 ```
 
-Masalahnya, hash password yang bocor tidak menggunakan salt. Ketika hash tidak diberi salt, nilai hash untuk password yang sama akan selalu identik. Hal ini membuat hash mudah dicrack menggunakan wordlist atau lookup database online.
-
-Hint challenge juga mengarah ke wordlist populer:
-
-```text
-rockyou rockyou rockyou
-```
-
-Hash admin:
+Hash admin yang ditemukan:
 
 ```text
 c20fa16907343eef642d10f0bdb81bf629e6aaf6c906f26eabda079ca9e5ab67
 ```
 
-Hash tersebut dianalisis menggunakan hash analyzer dan terdeteksi sebagai SHA2-256.
+Hash tersebut dianalisis dan terdeteksi sebagai SHA2-256.
+
+Screenshot:
 
 ![Analyze hash type](images/analyze%20hash%20type.png)
 
-Kemudian hash dicrack dan menghasilkan password berikut:
+Karena hash tidak menggunakan salt dan hint mengarah ke `rockyou`, hash dapat dicrack menggunakan wordlist atau hash lookup. Hasil crack menunjukkan password admin adalah:
 
 ```text
 apple@123
 ```
 
+Screenshot:
+
 ![Decrypt hash](images/decrypt.png)
 
-Dengan demikian credential admin yang valid adalah:
+Credential admin yang valid:
 
 ```text
 username: admin
 password: apple@123
 ```
 
-### 2. OTP 2FA Disimpan di Client-Side Session Cookie
+#### 2. 2FA Bypass via Client-Side Session Cookie
 
-Ketika user yang memiliki 2FA aktif berhasil memasukkan username dan password, aplikasi membuat OTP 4 digit.
+Setelah username dan password benar, aplikasi membuat OTP untuk user yang memiliki 2FA aktif.
 
 ```python
 otp = str(random.randint(1000, 9999))
@@ -167,9 +189,9 @@ session['username'] = username
 session['logged'] = 'false'
 ```
 
-Masalahnya, aplikasi Flask secara default menyimpan `session` di cookie client-side. Cookie Flask memang ditandatangani untuk mencegah modifikasi tanpa secret key, tetapi isinya tidak dienkripsi. Artinya, data sensitif seperti OTP masih bisa dibaca oleh attacker dari cookie.
+Masalahnya, aplikasi menggunakan session default Flask. Secara default, Flask menyimpan session di cookie client-side. Cookie tersebut ditandatangani, tetapi tidak dienkripsi. Artinya, user tidak bisa memodifikasi isi cookie tanpa secret key, tetapi user tetap bisa membaca isi session.
 
-Route 2FA kemudian membandingkan OTP input user dengan nilai `otp_secret` dari session.
+Route `/two_fa` kemudian membandingkan OTP input user dengan nilai `otp_secret` dari session.
 
 ```python
 @app.route('/two_fa', methods=['GET', 'POST'])
@@ -189,28 +211,40 @@ def two_fa():
         return render_template('2fa.html')
 ```
 
-Karena OTP tersimpan di cookie, attacker tidak perlu brute force OTP. Cukup decode cookie session, ambil nilai `otp_secret`, lalu masukkan OTP tersebut pada form 2FA.
+### Why It Works
 
-## Exploitation Steps
+Eksploitasi berhasil karena OTP rahasia justru disimpan di sisi client dalam cookie session Flask. Meskipun cookie tersebut signed, isinya tetap dapat didecode. Dengan membaca cookie, attacker dapat mengetahui OTP yang seharusnya hanya diketahui oleh server atau dikirim ke channel 2FA yang valid.
 
-### 1. Login Menggunakan Credential Admin
+Selain itu, password admin dapat ditemukan karena hash password bocor dan menggunakan SHA-256 tanpa salt. Kombinasi database leak, password hashing yang lemah, dan penyimpanan OTP di client-side session membuat autentikasi admin dapat dilewati sepenuhnya.
 
-Setelah password berhasil ditemukan, login ke aplikasi menggunakan credential berikut:
+---
+
+## Exploitation
+
+### Langkah 1 - Login sebagai Admin
+
+Gunakan credential admin yang diperoleh dari hasil cracking hash:
 
 ```text
 username: admin
 password: apple@123
 ```
 
+Screenshot:
+
 ![Login admin](images/login.png)
 
 Setelah login, aplikasi meminta OTP 4 digit karena akun admin memiliki 2FA aktif.
 
+Screenshot:
+
 ![Halaman OTP](images/minta%20otp.png)
 
-### 2. Ambil Cookie Session dari Browser DevTools
+### Langkah 2 - Ambil Cookie Session
 
-Buka browser DevTools, lalu masuk ke bagian Application → Cookies. Dari sana, salin nilai cookie session Flask.
+Buka Developer Tools pada browser, lalu masuk ke bagian Application atau Storage. Pada bagian Cookies, salin nilai cookie session Flask.
+
+Screenshot:
 
 ![Cookie session di DevTools](images/nunjukin-cookies.png)
 
@@ -220,40 +254,43 @@ Cookie session yang didapat:
 .eJwty0sKgCAUAMC7vLVEiv_LhORLBH-oraK756LtwDyQagjowcLl0kAgUGc7Bp4d50ItjPxtxoxjutzAUqUp3alhYmNSGsU5gXtgLy7jSs7nWOD9AEfEHGg.ail1ZQ.ctTCijNjuEgZ87LUvUm4a7sPC0M
 ```
 
-### 3. Decode Cookie Flask
+### Langkah 3 - Decode Cookie Flask
 
-Cookie Flask dapat didecode menggunakan `flask-unsign`.
+Cookie Flask dapat didecode menggunakan `flask-unsign`:
 
 ```bash
 flask-unsign --decode --cookie '.eJwty0sKgCAUAMC7vLVEiv_LhORLBH-oraK756LtwDyQagjowcLl0kAgUGc7Bp4d50ItjPxtxoxjutzAUqUp3alhYmNSGsU5gXtgLy7jSs7nWOD9AEfEHGg.ail1ZQ.ctTCijNjuEgZ87LUvUm4a7sPC0M'
 ```
 
-Output:
+Output decode:
 
 ```python
 {'logged': 'false', 'otp_secret': '8596', 'otp_timestamp': 1781101925.2669744, 'username': 'admin'}
 ```
 
+Screenshot:
+
 ![Decode cookie](images/decode-cookie.png)
 
-Dari hasil decode, terlihat bahwa OTP tersimpan langsung di dalam session cookie.
+Dari hasil decode, terlihat bahwa OTP tersimpan langsung di dalam cookie session:
 
 ```text
 otp_secret: 8596
 ```
 
-### 4. Masukkan OTP dan Ambil Flag
+### Langkah 4 - Masukkan OTP
 
-Masukkan OTP `8596` pada halaman 2FA. Karena nilai OTP valid dan masih berada dalam window waktu yang diizinkan, aplikasi mengubah session login menjadi valid.
+Masukkan OTP `8596` pada halaman 2FA. Karena OTP tersebut sama dengan nilai `otp_secret` di session dan masih berada dalam batas waktu valid, aplikasi akan mengubah status login menjadi valid.
 
 ```python
 session['logged'] = 'true'
 ```
 
-Setelah berhasil melewati 2FA, kita diarahkan ke halaman utama sebagai `admin`, sehingga flag ditampilkan.
+Setelah itu, user diarahkan ke halaman utama sebagai admin.
 
-![Flag](images/flag.png)
+---
 
+<<<<<<< HEAD
 ## Flag
 
 ```text
@@ -265,3 +302,5 @@ picoCTF{n0_r4t3_n0_4uth_7bd3c284}
 Jangan menyimpan data sensitif seperti OTP di client-side session cookie, karena cookie Flask hanya ditandatangani, bukan dienkripsi. Selain itu, password harus di-hash menggunakan algoritma khusus password seperti bcrypt, scrypt, atau Argon2 dengan salt unik agar tidak mudah dicrack ketika database bocor.
 
 Writer : Muhammad Afif Nuromli
+=======
+>>>>>>> ce1b806 (Hashgate Write up)
