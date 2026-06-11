@@ -246,3 +246,5 @@ picoCTF{id0r_unl0ck_090019fc}
 ## Lesson Learned
 
 Menyembunyikan ID menggunakan hash seperti MD5 tidak sama dengan menerapkan kontrol akses. Setiap request yang mengakses data user harus divalidasi di sisi server untuk memastikan user yang sedang login memang memiliki izin terhadap resource tersebut.
+
+Writer : Muhammad Afif Nuromlli
