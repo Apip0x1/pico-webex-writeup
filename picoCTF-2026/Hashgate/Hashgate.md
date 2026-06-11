@@ -5,7 +5,7 @@
 | Event | picoCTF 2026 |
 | Challenge | No FA / Hashgate |
 | Kategori | Web Exploitation |
-| Poin | 200 |
+| Poin | 100 |
 | Difficulty | Medium |
 | Author | Yahaya Meddy |
 
