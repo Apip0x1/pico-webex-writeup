@@ -8,7 +8,6 @@ Repository ini berisi dokumentasi penyelesaian challenge picoCTF 2026, khususnya
 |---|---|---:|---:|---|
 | Credential Stuffing | Web Exploitation | Medium | 100 | [Credential-Stuffing/Credential-Stuffing.md](Credential-Stuffing/Credential-Stuffing.md) |
 | No FA / Hashgate | Web Exploitation | Medium | 100 | [Hashgate/Hashgate.md](Hashgate/Hashgate.md) |
-| JAuth | Web Exploitation | Medium | 300 | [JAuth/JAuth.md](JAuth/JAuth.md) |
 | No FA | Web Exploitation | Medium | 200 | [No-FA/No-FA.md](No-FA/No-FA.md) |
 | Old Sessions | Web Exploitation | Easy | 100 | [Old-Sessions/Old-Sessions.md](Old-Sessions/Old-Sessions.md) |
 | Secret Box | Web Exploitation | Medium | - | [Secret-Box/Secret-Box.md](Secret-Box/Secret-Box.md) |
@@ -26,9 +25,6 @@ Repository ini berisi dokumentasi penyelesaian challenge picoCTF 2026, khususnya
 |   |-- Hashgate.md
 |   |-- exploit.py
 |   `-- images/
-|-- JAuth/
-|   |-- JAuth.md
-|   `-- README.md
 |-- No-FA/
 |   |-- No-FA.md
 |   |-- attachment/
@@ -66,19 +62,6 @@ Challenge web exploitation yang membahas IDOR ketika identifier profil user hany
 - Akses profil admin untuk mendapatkan flag.
 
 Writeup lengkap: [Hashgate/Hashgate.md](Hashgate/Hashgate.md)
-
-### JAuth
-
-Challenge web exploitation yang membahas kelemahan verifikasi JWT ketika server menerima token unsigned dengan algoritma `none`. Writeup ini mencakup:
-
-- Login menggunakan credential test yang diberikan challenge.
-- Inspeksi cookie JWT melalui Browser DevTools.
-- Decode header dan payload JWT untuk menemukan claim `role`.
-- Penjelasan kenapa mengganti `role` saja gagal pada token `HS256`.
-- Eksploitasi JWT `alg: none` dengan signature kosong dan dua separator titik.
-- Penggantian cookie untuk menjadi admin dan mendapatkan flag.
-
-Writeup lengkap: [JAuth/JAuth.md](JAuth/JAuth.md)
 
 ### No FA
 
@@ -123,7 +106,6 @@ Writeup lengkap: [Secret-Box/Secret-Box.md](Secret-Box/Secret-Box.md)
 Beberapa tools dan teknik yang digunakan dalam writeup:
 
 - Browser DevTools untuk inspeksi cookie dan session.
-- JWT decoder untuk analisis token dan eksploitasi `alg: none`.
 - `sqlite3` untuk membaca database SQLite.
 - Hash analyzer untuk identifikasi tipe hash.
 - MD5 lookup/decrypt untuk validasi hash ID.
